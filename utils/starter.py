@@ -9,8 +9,8 @@ import asyncio
 import os
 
 
-async def start(thread: int, session_name: str, phone_number: str, proxy: [str, None]):
-    cats = CatsGang(session_name=session_name, phone_number=phone_number, thread=thread, proxy=proxy)
+async def start(thread: int, session_name: str, phone_number: str, proxy: [str, None], images: [list, None]): # type: ignore
+    cats = CatsGang(session_name=session_name, phone_number=phone_number, thread=thread, proxy=proxy, images=images)
     account = session_name + '.session'
 
     attempts = 3
@@ -27,6 +27,16 @@ async def start(thread: int, session_name: str, phone_number: str, proxy: [str, 
         logger.error(f"Thread {thread} | {account} | Couldn't login")
         await cats.logout()
         return
+    
+    attempts = 10
+    while attempts:
+        logger.info(f"Thread {thread} | {account} | Attempts left {attempts}")
+        try:
+            await cats.upload_avatar()
+            break
+        except:
+            await asyncio.sleep(random.uniform(*config.DELAYS['REUPLOAD']))
+            attempts -= 1
 
     for task in await cats.get_tasks():
         if task['completed']: continue
