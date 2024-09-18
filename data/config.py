@@ -3,7 +3,9 @@ API_ID = 1488
 API_HASH = 'abcde1488'
 
 DELAYS = {
-    'ACCOUNT': [5, 15],  # delay between connections to accounts (the more accounts, the longer the delay)
+    "REUPLOAD": [50, 100], #delay after a upload attempt
+    "RELOGIN": [5, 10],  # delay after a login attempt
+    'ACCOUNT': [50, 150],  # delay between connections to accounts (the more accounts, the longer the delay)
     'TASK':  [5, 10],  # delay after complete task
 }
 
