@@ -16,6 +16,8 @@ PROXY = {
         }
 }
 
+IMAGE_FOLDER_PATH = 'data/img'
+
 # session folder (do not change)
 WORKDIR = "sessions/"
 
