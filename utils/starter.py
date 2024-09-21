@@ -11,6 +11,8 @@ import os
 
 async def start(thread: int, session_name: str, phone_number: str, proxy: [str, None], images: [list, None]): # type: ignore
     while True:
+        random.shuffle(images)
+        
         cats = CatsGang(session_name=session_name, phone_number=phone_number, thread=thread, proxy=proxy, images=images)
         account = session_name + '.session'
 
