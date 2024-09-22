@@ -44,7 +44,7 @@ async def start(thread: int, session_name: str, phone_number: str, proxy: [str, 
                     attempts -= 1
 
             for task in await cats.get_tasks():
-                if task['completed']:
+                if task['completed'] or task['title'] in config.BLACKLIST_TASKS:
                     continue
 
                 if task['type'] == 'OPEN_LINK':
