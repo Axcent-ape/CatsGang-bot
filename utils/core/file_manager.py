@@ -29,3 +29,8 @@ def save_list_to_file(filepath: str, list_: list):
     with open(filepath, mode="w", encoding="utf-8") as file:
         for item in list_:
             file.write(f"{item['session_name']}.session\n")
+
+def get_images_from_folder(folder_path: str):
+    supported_formats = ('.jpg', '.jpeg', '.png', '.gif', '.bmp')
+    images = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.lower().endswith(supported_formats)]
+    return images
