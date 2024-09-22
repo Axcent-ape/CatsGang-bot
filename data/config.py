@@ -18,6 +18,8 @@ PROXY = {
         }
 }
 
+BLACKLIST_TASKS = ['Join MemeFi Community', 'Join Major Community', 'Subscribe to Channel', 'Join MemeFi Community', 'Follow BAKS 🐈‍⬛ channel', 'Follow Activity 🚀 channel', 'Join Tomarket Announcement', 'Join OKX news Channel']
+
 IMAGE_FOLDER_PATH = 'data/img'
 
 # session folder (do not change)
