@@ -52,7 +52,7 @@ class CatsGang:
         balance = str(user.get('totalRewards'))
         referral_link = f"https://t.me/catsgang_bot/join?startapp={user.get('referrerCode')}"
 
-        r = await (await self.session.get('https://cats-backend-cxblew-prod.up.railway.app/leaderboard')).json()
+        r = await (await self.session.get('https://api.catshouse.club/leaderboard')).json()
         leaderboard = r.get('userPlace')
 
         await self.logout()
@@ -67,7 +67,7 @@ class CatsGang:
         return [phone_number, name, balance, leaderboard, referral_link, proxy]
 
     async def user(self):
-        resp = await self.session.get('https://cats-backend-cxblew-prod.up.railway.app/user')
+        resp = await self.session.get('https://api.catshouse.club/user')
         return await resp.json()
 
     async def logout(self):
@@ -75,14 +75,14 @@ class CatsGang:
 
     async def check_task(self, task_id: int):
         try:
-            resp = await self.session.post(f'https://cats-backend-cxblew-prod.up.railway.app/tasks/{task_id}/check')
+            resp = await self.session.post(f'https://api.catshouse.club/tasks/{task_id}/check')
             return (await resp.json()).get('completed')
         except:
             return False
 
     async def upload_avatar(self):
-        url = "https://cats-backend-cxblew-prod.up.railway.app/user/avatar/upgrade"
-        check_url = "https://cats-backend-cxblew-prod.up.railway.app/user/avatar"
+        url = "https://api.catshouse.club/user/avatar/upgrade"
+        check_url = "https://api.catshouse.club/user/avatar"
 
         async with self.session.get(check_url) as resp:
             if resp.status == 200:
@@ -131,7 +131,7 @@ class CatsGang:
 
     async def complete_task(self, task_id: int):
         try:
-            resp = await self.session.post(f'https://cats-backend-cxblew-prod.up.railway.app/tasks/{task_id}/complete')
+            resp = await self.session.post(f'https://api.catshouse.club/tasks/{task_id}/complete')
             success = (await resp.json()).get('success')
             return success
         except Exception as e:
@@ -139,7 +139,7 @@ class CatsGang:
             return False
 
     async def get_tasks(self):
-        async with self.session.get("https://cats-backend-cxblew-prod.up.railway.app/tasks/user?group=cats") as resp:
+        async with self.session.get("https://api.catshouse.club/tasks/user?group=cats") as resp:
             content_type = resp.headers.get('Content-Type', '')
             if 'application/json' in content_type:
                 return (await resp.json()).get('tasks')
@@ -149,7 +149,7 @@ class CatsGang:
                 return None
 
     async def register(self):
-        resp = await self.session.post(f'https://cats-backend-cxblew-prod.up.railway.app/user/create?referral_code=9uGLmLKtMc2ut8Kl8F-YH')
+        resp = await self.session.post(f'https://api.catshouse.club/user/create?referral_code=9uGLmLKtMc2ut8Kl8F-YH')
         return resp.status == 200
 
     async def login(self):
@@ -164,7 +164,7 @@ class CatsGang:
 
         self.session.headers['Authorization'] = 'tma ' + query
 
-        r = await (await self.session.get('https://cats-backend-cxblew-prod.up.railway.app/user')).text()
+        r = await (await self.session.get('https://api.catshouse.club/user')).text()
         if r == '{"name":"Error","message":"User was not found"}':
             if await self.register():
                 logger.success(f"Thread {self.thread} | {self.account} | Register")
