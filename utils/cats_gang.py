@@ -1,5 +1,5 @@
 import random
-import time
+import datetime
 from utils.core import logger
 from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestAppWebView
@@ -81,53 +81,57 @@ class CatsGang:
             return False
 
     async def upload_avatar(self):
-        url = "https://api.catshouse.club/user/avatar/upgrade"
-        check_url = "https://api.catshouse.club/user/avatar"
-
-        async with self.session.get(check_url) as resp:
-            if resp.status == 200:
-                json_response = await resp.json()
-                attempts_used = json_response.get('attemptsUsed', 0)
-
-                if attempts_used == 1:
-                    logger.info(f"Thread {self.thread} | {self.account} | Avatar already uploaded. No further upload attempts required.")
-                    return 
-            else:
-                logger.error(f"Thread {self.thread} | {self.account} | Failed to check avatar status, status code: {resp.status}")
+            url = "https://api.catshouse.club/user/avatar/upgrade"
+            check_url = "https://api.catshouse.club/user/avatar"
+    
+            async with self.session.get(check_url) as resp:
+                if resp.status == 200:
+                    json_response = await resp.json()
+                    attempt_time = json_response.get('attemptTime')
+    
+                    if attempt_time:
+                        try:
+                            last_attempt_time = datetime.datetime.strptime(attempt_time, "%Y-%m-%dT%H:%M:%S.%fZ")
+                            current_time = datetime.datetime.utcnow()
+                            time_diff = current_time - last_attempt_time
+    
+                            if time_diff < datetime.timedelta(hours=24, seconds=1):
+                                logger.info(f"Thread {self.thread} | {self.account} | Last avatar upload was less than 24 hours ago. Skipping upload.")
+                                return
+                        except Exception as e:
+                            logger.error(f"Thread {self.thread} | {self.account} | Error parsing attemptTime: {e}")
+    
+                else:
+                    logger.error(f"Thread {self.thread} | {self.account} | Failed to check avatar status, status code: {resp.status}")
+                    return
+    
+            logger.info(f"Thread {self.thread} | {self.account} | Upgrade Cat...")
+    
+            if not self.images:
+                logger.error(f"No images found in folder: {config.IMAGE_FOLDER_PATH}")
                 return
-
-        async with self.session.options(url) as resp:
-            if resp.status == 204:
-                logger.info("Upgrade Cat...")
-            else:
-                logger.error(f"Upgrade Cat error, status: {resp.status}")
-                return
-
-        if not self.images:
-            logger.error(f"No images found in folder: {config.IMAGE_FOLDER_PATH}")
-            return
-
-        image_index = self.thread % len(self.images)
-        image_path = self.images[image_index]
-
-        try:
-            with open(image_path, 'rb') as image_file:
-                data = aiohttp.FormData()
-                data.add_field('photo', image_file, filename=os.path.basename(image_path), content_type='image/jpeg')
-
-                async with self.session.post(url, data=data) as response:
-                    if response.status == 200:
-                        json_response = await response.json()
-                        rewards = json_response.get('rewards')
-                        if rewards is not None:
-                            logger.success(f"Thread {self.thread} | {self.account} | Avatar uploaded successfully. Rewards: {rewards}")
+    
+            image_index = self.thread % len(self.images)
+            image_path = self.images[image_index]
+    
+            try:
+                with open(image_path, 'rb') as image_file:
+                    data = aiohttp.FormData()
+                    data.add_field('photo', image_file, filename=os.path.basename(image_path), content_type='image/jpeg')
+    
+                    async with self.session.post(url, data=data) as response:
+                        if response.status == 200:
+                            json_response = await response.json()
+                            rewards = json_response.get('rewards')
+                            if rewards is not None:
+                                logger.success(f"Thread {self.thread} | {self.account} | Avatar uploaded successfully. Rewards: {rewards}")
+                            else:
+                                logger.warning(f"Thread {self.thread} | {self.account} | Avatar uploaded, but 'rewards' field not found in the response.")
                         else:
-                            logger.warning(f"Thread {self.thread} | {self.account} | Avatar uploaded, but 'rewards' field not found in the response.")
-                    else:
-                        logger.error(f"Thread {self.thread} | {self.account} | Failed to upload avatar, status code: {response.status}")
-
-        except Exception as e:
-            logger.error(f"Thread {self.thread} | {self.account} | Error uploading avatar {image_path}: {e}")
+                            logger.error(f"Thread {self.thread} | {self.account} | Failed to upload avatar, status code: {response.status}")
+    
+            except Exception as e:
+                logger.error(f"Thread {self.thread} | {self.account} | Error uploading avatar {image_path}: {e}")
 
     async def complete_task(self, task_id: int):
         try:
